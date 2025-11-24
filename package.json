@@ -12,7 +12,7 @@
   },
   "scripts": {
     "pglite-prep": "cp ./node_modules/@electric-sql/pglite/dist/pglite.wasm ./lib/pglite-assets/ && cp ./node_modules/@electric-sql/pglite/dist/pglite.data ./lib/pglite-assets/",
-    "build": "bun pglite-prep && scripts/build.sh",
+    "cc": "bun pglite-prep && scripts/build.sh",
     "eslint": "eslint . --ext .ts --cache"
   },
   "peerDependencies": {

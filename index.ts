@@ -1,7 +1,14 @@
-import { Hello, type HelloOptions } from "./lib/hello.js";
+import { createPGlite } from "./lib/pgshim.js";
 
-const hello = new Hello({
-  greeting: "Hi",
-} as HelloOptions);
+let dbInstance: ReturnType<typeof createPGlite> | null = null;
 
-console.log(hello.greet("Jeff"));
+export async function getDatabase() {
+  if (!dbInstance) {
+    dbInstance = createPGlite("./data");
+  }
+  return dbInstance;
+}
+
+const pg = await getDatabase();
+
+console.log("pg", typeof pg);

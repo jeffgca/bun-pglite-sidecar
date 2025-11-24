@@ -11,10 +11,14 @@
     "typescript-eslint": "^8.48.0"
   },
   "scripts": {
-    "build": "scripts/build.sh",
+    "pglite-prep": "cp ./node_modules/@electric-sql/pglite/dist/pglite.wasm ./lib/pglite-assets/ && cp ./node_modules/@electric-sql/pglite/dist/pglite.data ./lib/pglite-assets/",
+    "build": "bun pglite-prep && scripts/build.sh",
     "eslint": "eslint . --ext .ts --cache"
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.3.14"
   }
 }

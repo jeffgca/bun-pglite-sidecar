@@ -1,4 +1,4 @@
-import { createPGlite } from "./lib/pgshim.js";
+import { createPGlite } from "./lib/pglite-shim.js";
 
 let dbInstance: ReturnType<typeof createPGlite> | null = null;
 

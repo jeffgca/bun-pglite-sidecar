@@ -26,6 +26,9 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Prepare PGlite assets
+        run: bun run pglite-prep
+
       - name: Run tests
         run: bun test
 

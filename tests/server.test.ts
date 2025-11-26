@@ -33,7 +33,7 @@ async function waitForServer(baseUrl: string, maxAttempts = 50): Promise<void> {
 
 async function getStatus(baseUrl: string): Promise<ServerStatus> {
   const res = await fetch(`${baseUrl}/status`);
-  return await res.json();
+  return (await res.json()) as ServerStatus;
 }
 
 function createTempDataDir(): string {
@@ -74,10 +74,8 @@ describe("Server (bun index.ts)", () => {
   test("health endpoint returns OK", async () => {
     const res = await fetch(`${baseUrl}/health`);
     expect(res.status).toBe(200);
-    const result = await res.json();
+    const result = (await res.json()) as { message: string };
     expect(result.message).toBe("OK");
-    //
-    // expect(await res.text()).toBe("OK");
   });
 
   test("status endpoint returns valid JSON", async () => {
@@ -196,21 +194,21 @@ describe.if(isMacOS)("Server (compiled binary ./dist/sidecar)", () => {
   test("root endpoint returns JSON message", async () => {
     const res = await fetch(`${baseUrl}/`);
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json = (await res.json()) as { message: string };
     expect(json.message).toBe("Bun PGlite Sidecar is running");
   });
 
   test("ping endpoint returns JSON pong", async () => {
     const res = await fetch(`${baseUrl}/ping`);
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json = (await res.json()) as { message: string };
     expect(json.message).toBe("pong");
   });
 
   test("health endpoint returns JSON OK", async () => {
     const res = await fetch(`${baseUrl}/health`);
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json = (await res.json()) as { message: string };
     expect(json.message).toBe("OK");
   });
 

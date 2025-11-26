@@ -16,8 +16,12 @@ fi
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 
 if [[ -z "${EXE_FILE_NAME:-}" ]]; then
-	EXE_FILE_NAME="index"
+	EXE_FILE_NAME="sidecar"
 fi
+
+PLAT_SUFFIX=`bun ./scripts/tauri-name.js`
+
+BUILD_FILE="$EXE_FILE_NAME-$PLAT_SUFFIX"
 
 if [[ -z "${OUTPUT_DIR:-}" ]]; then
 	OUTPUT_DIR="$ROOT_DIR/dist"

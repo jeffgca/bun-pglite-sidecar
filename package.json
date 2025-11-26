@@ -12,13 +12,14 @@
   },
   "scripts": {
     "pglite-prep": "cp ./node_modules/@electric-sql/pglite/dist/pglite.wasm ./lib/pglite-assets/ && cp ./node_modules/@electric-sql/pglite/dist/pglite.data ./lib/pglite-assets/",
-    "cc": "bun pglite-prep && scripts/build.sh",
+    "cc": "bun pglite-prep && scripts/build.sh && bun scripts/tauri-name.js",
     "eslint": "eslint . --ext .ts --cache"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
-    "@electric-sql/pglite": "^0.3.14"
+    "@electric-sql/pglite": "^0.3.14",
+    "lodash-es": "^4.17.21"
   }
 }

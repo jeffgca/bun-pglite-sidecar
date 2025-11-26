@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeAll, afterAll } from "bun:test";
 import { spawn, spawnSync, type Subprocess } from "bun";
-import { mkdtempSync, rmSync, existsSync } from "node:fs";
+import { mkdtempSync, rmSync, existsSync, writeFileSync } from "node:fs";
 import { tmpdir, platform } from "node:os";
 import { join } from "node:path";
 
@@ -40,16 +40,24 @@ function createTempDataDir(): string {
   return mkdtempSync(join(tmpdir(), "pglite-test-"));
 }
 
+function createTempSchemaFile(dir: string): string {
+  const schemaPath = join(dir, "schema.sql");
+  writeFileSync(schemaPath, "-- Empty schema for testing\n");
+  return schemaPath;
+}
+
 describe("Server (bun index.ts)", () => {
   let proc: Subprocess;
   let baseUrl: string;
   let dataDir: string;
+  let schemaFile: string;
   const port = 4001;
 
   beforeAll(async () => {
     dataDir = createTempDataDir();
+    schemaFile = createTempSchemaFile(dataDir);
     proc = spawn({
-      cmd: ["bun", "index.ts", String(port), dataDir],
+      cmd: ["bun", "index.ts", "-p", String(port), "-s", schemaFile, "-d", dataDir],
       cwd: import.meta.dir + "/..",
       stdout: "ignore",
       stderr: "ignore",
@@ -146,6 +154,7 @@ describe.if(isMacOS)("Server (compiled binary ./dist/sidecar)", () => {
   let proc: Subprocess;
   let baseUrl: string;
   let dataDir: string;
+  let schemaFile: string;
   const port = 4002;
   const rootDir = join(import.meta.dir, "..");
   // XXX Apple-only!!! for now
@@ -169,8 +178,9 @@ describe.if(isMacOS)("Server (compiled binary ./dist/sidecar)", () => {
     }
 
     dataDir = createTempDataDir();
+    schemaFile = createTempSchemaFile(dataDir);
     proc = spawn({
-      cmd: [binaryPath, String(port), dataDir],
+      cmd: [binaryPath, "-p", String(port), "-s", schemaFile, "-d", dataDir],
       stdout: "ignore",
       stderr: "ignore",
     });

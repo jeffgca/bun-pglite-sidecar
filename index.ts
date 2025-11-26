@@ -45,9 +45,17 @@ const server = Bun.serve({
       return new Response("WebSocket upgrade failed", { status: 400 });
     }
 
+    if (url.pathname === "/") {
+      return new Response(JSON.stringify({ message: "Bun PGlite Sidecar is running" }), { status: 200 });
+    }
+
+    if (url.pathname === "/ping") {
+      return new Response(JSON.stringify({ message: "pong" }), { status: 200 });
+    }
+
     // Simple HTTP health check
     if (url.pathname === "/health") {
-      return new Response("OK", { status: 200 });
+      return new Response(JSON.stringify({ message: "OK" }), { status: 200 });
     }
 
     // WebSocket server status endpoint

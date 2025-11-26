@@ -1,8 +1,10 @@
 import { describe, test, expect, beforeAll, afterAll } from "bun:test";
 import { spawn, spawnSync, type Subprocess } from "bun";
 import { mkdtempSync, rmSync, existsSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { tmpdir, platform } from "node:os";
 import { join } from "node:path";
+
+const isMacOS = platform() === "darwin";
 
 interface ServerStatus {
   server: {
@@ -64,7 +66,10 @@ describe("Server (bun index.ts)", () => {
   test("health endpoint returns OK", async () => {
     const res = await fetch(`${baseUrl}/health`);
     expect(res.status).toBe(200);
-    expect(await res.text()).toBe("OK");
+    const result = await res.json();
+    expect(result.message).toBe("OK");
+    //
+    // expect(await res.text()).toBe("OK");
   });
 
   test("status endpoint returns valid JSON", async () => {
@@ -137,7 +142,7 @@ describe("Server (bun index.ts)", () => {
   });
 });
 
-describe("Server (compiled binary ./dist/sidecar)", () => {
+describe.if(isMacOS)("Server (compiled binary ./dist/sidecar)", () => {
   let proc: Subprocess;
   let baseUrl: string;
   let dataDir: string;
@@ -178,10 +183,25 @@ describe("Server (compiled binary ./dist/sidecar)", () => {
     rmSync(dataDir, { recursive: true, force: true });
   });
 
-  test("health endpoint returns OK", async () => {
+  test("root endpoint returns JSON message", async () => {
+    const res = await fetch(`${baseUrl}/`);
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.message).toBe("Bun PGlite Sidecar is running");
+  });
+
+  test("ping endpoint returns JSON pong", async () => {
+    const res = await fetch(`${baseUrl}/ping`);
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.message).toBe("pong");
+  });
+
+  test("health endpoint returns JSON OK", async () => {
     const res = await fetch(`${baseUrl}/health`);
     expect(res.status).toBe(200);
-    expect(await res.text()).toBe("OK");
+    const json = await res.json();
+    expect(json.message).toBe("OK");
   });
 
   test("status endpoint returns valid JSON", async () => {

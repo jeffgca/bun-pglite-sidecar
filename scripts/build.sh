@@ -19,9 +19,9 @@ if [[ -z "${EXE_FILE_NAME:-}" ]]; then
 	EXE_FILE_NAME="sidecar"
 fi
 
-PLAT_SUFFIX=`bun ./scripts/tauri-name.js`
+# PLAT_SUFFIX=`bun ./scripts/tauri-name.js`
 
-BUILD_FILE="$EXE_FILE_NAME-$PLAT_SUFFIX"
+BUILD_FILE=`bun ./scripts/tauri-name.js`
 
 if [[ -z "${OUTPUT_DIR:-}" ]]; then
 	OUTPUT_DIR="$ROOT_DIR/dist"
@@ -29,7 +29,7 @@ fi
 
 mkdir -p "$OUTPUT_DIR"
 
-bun build --compile --target=bun "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME"
+bun build --compile --target=bun "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$BUILD_FILE"
 
 # Clean up any .bun-build files generated during the build process
 shopt -s nullglob dotglob

@@ -12,7 +12,7 @@
   },
   "scripts": {
     "pglite-prep": "cp ./node_modules/@electric-sql/pglite/dist/pglite.wasm ./lib/pglite-assets/ && cp ./node_modules/@electric-sql/pglite/dist/pglite.data ./lib/pglite-assets/",
-    "cc": "bun pglite-prep && scripts/build.sh && bun scripts/tauri-name.js",
+    "cc": "bun pglite-prep && scripts/build.sh",
     "eslint": "eslint . --ext .ts --cache"
   },
   "peerDependencies": {

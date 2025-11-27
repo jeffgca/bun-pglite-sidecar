@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeAll, afterAll } from "bun:test";
 import { spawn, spawnSync, type Subprocess } from "bun";
-import { mkdtempSync, rmSync, existsSync, writeFileSync } from "node:fs";
+import { mkdtempSync, rmSync, existsSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir, platform } from "node:os";
 import { join } from "node:path";
 
@@ -40,24 +40,26 @@ function createTempDataDir(): string {
   return mkdtempSync(join(tmpdir(), "pglite-test-"));
 }
 
-function createTempSchemaFile(dir: string): string {
-  const schemaPath = join(dir, "schema.sql");
-  writeFileSync(schemaPath, "-- Empty schema for testing\n");
-  return schemaPath;
+function createTempMigrationsDir(baseDir: string): string {
+  const migrationsDir = join(baseDir, "migrations");
+  mkdirSync(migrationsDir, { recursive: true });
+  // Create a simple initial migration
+  writeFileSync(join(migrationsDir, "001_initial.sql"), "-- Initial migration for testing\nCREATE TABLE IF NOT EXISTS test_table (id SERIAL PRIMARY KEY);\n");
+  return migrationsDir;
 }
 
 describe("Server (bun index.ts)", () => {
   let proc: Subprocess;
   let baseUrl: string;
   let dataDir: string;
-  let schemaFile: string;
+  let migrationsDir: string;
   const port = 4001;
 
   beforeAll(async () => {
     dataDir = createTempDataDir();
-    schemaFile = createTempSchemaFile(dataDir);
+    migrationsDir = createTempMigrationsDir(dataDir);
     proc = spawn({
-      cmd: ["bun", "index.ts", "-p", String(port), "-s", schemaFile, "-d", dataDir],
+      cmd: ["bun", "index.ts", "-p", String(port), "-m", migrationsDir, "-d", dataDir],
       cwd: import.meta.dir + "/..",
       stdout: "ignore",
       stderr: "ignore",
@@ -152,7 +154,7 @@ describe.if(isMacOS)("Server (compiled binary ./dist/sidecar)", () => {
   let proc: Subprocess;
   let baseUrl: string;
   let dataDir: string;
-  let schemaFile: string;
+  let migrationsDir: string;
   const port = 4002;
   const rootDir = join(import.meta.dir, "..");
   // XXX Apple-only!!! for now
@@ -176,9 +178,9 @@ describe.if(isMacOS)("Server (compiled binary ./dist/sidecar)", () => {
     }
 
     dataDir = createTempDataDir();
-    schemaFile = createTempSchemaFile(dataDir);
+    migrationsDir = createTempMigrationsDir(dataDir);
     proc = spawn({
-      cmd: [binaryPath, "-p", String(port), "-s", schemaFile, "-d", dataDir],
+      cmd: [binaryPath, "-p", String(port), "-m", migrationsDir, "-d", dataDir],
       stdout: "ignore",
       stderr: "ignore",
     });

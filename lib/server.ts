@@ -1,7 +1,7 @@
 export interface ServerConfig {
   port: number;
   dataDir: string;
-  schema: string;
+  migrationsPath: string;
 }
 
 export interface ServerStatus {
@@ -17,7 +17,7 @@ export interface ServerStatus {
 }
 
 export function createServer(config: ServerConfig) {
-  const { port, dataDir, schema } = config;
+  const { port, dataDir, migrationsPath } = config;
 
   // Track WebSocket connection stats
   let activeConnections = 0;
@@ -100,7 +100,7 @@ export function createServer(config: ServerConfig) {
   console.log(`Server listening on http://localhost:${server.port}`);
   console.log(`WebSocket available at ws://localhost:${server.port}/ws`);
   console.log(`Database directory: ${dataDir}`);
-  console.log(`Schema file: ${schema}`);
+  console.log(`Migrations directory: ${migrationsPath}`);
 
   return server;
 }

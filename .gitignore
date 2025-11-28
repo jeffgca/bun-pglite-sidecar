@@ -5,6 +5,7 @@ node_modules
 out
 dist
 data
+tmp
 *.tgz
 
 # code coverage

@@ -60,7 +60,7 @@ jobs:
 
       - name: Determine expected version
         id: pkg
-        run: echo "version=$(./scripts/get-version.sh)" >> $GITHUB_OUTPUT
+        run: echo "version=$(bun scripts/get-version.ts)" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Make executable (non-Windows)

@@ -20,7 +20,7 @@ BUN_WINDOWS_TARGET="bun-windows-x64"
 
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
-VERSION=$("$ROOT_DIR/scripts/get-version.sh")
+VERSION=$(bun "$ROOT_DIR/scripts/get-version.ts")
 
 if [[ -z "${EXE_FILE_NAME:-}" ]]; then
 	EXE_FILE_NAME="sidecar"
@@ -44,16 +44,16 @@ fi
 
 # Optional: build only one platform if BUILD_ONLY is set
 case "${BUILD_ONLY:-}" in
-	macos-arm)
+	macos-arm64)
 		bun build --compile --define:APP_VERSION=$VERSION --target=$BUN_MACOS_ARM_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-aarch64-apple-darwin"
 		;;
-	macos-x86)
+	macos-x86_64)
 		bun build --compile --define:APP_VERSION=$VERSION --target=$BUN_MACOS_X86_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-x86_64-apple-darwin"
 		;;
-	linux-x86)
+	linux-x64)
 		bun build --compile --define:APP_VERSION=$VERSION --target=$BUN_LINUX_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-x86_64-unknown-linux-gnu"
 		;;
-	windows-x86)
+	windows-x86_64)
 		bun build --compile --define:APP_VERSION=$VERSION --target=$BUN_WINDOWS_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-x86_64-pc-windows-msvc.exe"
 		;;
 	"" )

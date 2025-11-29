@@ -51,7 +51,7 @@ jobs:
 
       - name: Determine expected version
         id: pkg
-        run: echo "version=$(node -p \"require('./package.json').version\")" >> $GITHUB_OUTPUT
+        run: echo "version=$(./scripts/get-version.sh)" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Verify each built binary prints version

@@ -20,7 +20,7 @@ BUN_WINDOWS_TARGET="bun-windows-x64"
 
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
-VERSION=$(node -p "require('./package.json').version")
+VERSION=$("$ROOT_DIR/scripts/get-version.sh")
 
 if [[ -z "${EXE_FILE_NAME:-}" ]]; then
 	EXE_FILE_NAME="sidecar"

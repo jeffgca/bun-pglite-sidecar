@@ -1,4 +1,4 @@
-# .github/workflows/test.yml
+name: Run Unit Tests
 
 on:
   push:

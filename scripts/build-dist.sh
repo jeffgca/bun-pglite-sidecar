@@ -20,6 +20,7 @@ BUN_WINDOWS_TARGET="bun-windows-x64"
 
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
+VERSION=$(node -p "require('./package.json').version")
 
 if [[ -z "${EXE_FILE_NAME:-}" ]]; then
 	EXE_FILE_NAME="sidecar"
@@ -35,10 +36,10 @@ fi
 
 mkdir -p "$OUTPUT_DIR"
  
-bun build --compile --target=$BUN_MACOS_ARM_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-aarch64-apple-darwin"
-bun build --compile --target=$BUN_MACOS_X86_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-x86_64-apple-darwin"
-bun build --compile --target=$BUN_LINUX_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-x86_64-unknown-linux-gnu"
-bun build --compile --target=$BUN_WINDOWS_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-x86_64-pc-windows-msvc.exe"
+bun build --compile --define:APP_VERSION=$VERSION --target=$BUN_MACOS_ARM_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-aarch64-apple-darwin"
+bun build --compile --define:APP_VERSION=$VERSION --target=$BUN_MACOS_X86_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-x86_64-apple-darwin"
+bun build --compile --define:APP_VERSION=$VERSION --target=$BUN_LINUX_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-x86_64-unknown-linux-gnu"
+bun build --compile --define:APP_VERSION=$VERSION --target=$BUN_WINDOWS_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-x86_64-pc-windows-msvc.exe"
 
 # Clean up any .bun-build files generated during the build process
 shopt -s nullglob dotglob

@@ -1,0 +1,79 @@
+name: Build & Verify Binaries
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    name: Build + Version Check
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            label: linux-x64
+          - os: macos-13
+            label: macos-x86_64
+          - os: macos-14
+            label: macos-arm64
+          - os: windows-latest
+            label: windows-x86_64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Show Bun & Node versions
+        run: |
+          bun --version
+          node --version
+
+      - name: Build multi-target binaries
+        run: scripts/build-dist.sh
+        shell: bash
+
+      - name: List dist contents
+        run: ls -l dist
+        shell: bash
+
+      - name: Determine expected version
+        id: pkg
+        run: echo "version=$(node -p \"require('./package.json').version\")" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Verify each built binary prints version
+        run: |
+          set -euo pipefail
+          EXPECTED="${{ steps.pkg.outputs.version }}"
+          echo "Expected version: $EXPECTED"
+          for f in dist/sidecar-*; do
+            echo "Testing $f --version";
+            if [[ "$f" == *.exe ]]; then
+              out=$(./$f --version || true)
+            else
+              out=$($f --version || true)
+            fi
+            echo "Output: $out"
+            if [[ "$out" != "$EXPECTED" ]]; then
+              echo "Version mismatch for $f (got '$out')" >&2
+              exit 1
+            fi
+          done
+        shell: bash
+
+      - name: Upload dist artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sidecar-${{ matrix.label }}
+          path: dist/*
+          if-no-files-found: error

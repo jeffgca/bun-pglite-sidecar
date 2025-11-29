@@ -17,12 +17,20 @@ jobs:
         include:
           - os: ubuntu-latest
             label: linux-x64
+            binary: dist/sidecar-x86_64-unknown-linux-gnu
+            shell: bash
           - os: macos-13
             label: macos-x86_64
+            binary: dist/sidecar-x86_64-apple-darwin
+            shell: bash
           - os: macos-14
             label: macos-arm64
+            binary: dist/sidecar-aarch64-apple-darwin
+            shell: bash
           - os: windows-latest
             label: windows-x86_64
+            binary: dist/sidecar-x86_64-pc-windows-msvc.exe
+            shell: pwsh
 
     steps:
       - name: Checkout
@@ -41,8 +49,9 @@ jobs:
           bun --version
           node --version
 
-      - name: Build multi-target binaries
-        run: scripts/build-dist.sh
+      - name: Build matched binary (clean dist)
+        run: |
+          CLEAN_DIST=1 BUILD_ONLY=${{ matrix.label }} scripts/build-dist.sh
         shell: bash
 
       - name: List dist contents
@@ -54,29 +63,44 @@ jobs:
         run: echo "version=$(./scripts/get-version.sh)" >> $GITHUB_OUTPUT
         shell: bash
 
-      - name: Verify each built binary prints version
+      - name: Make executable (non-Windows)
+        if: ${{ matrix.shell == 'bash' }}
+        run: chmod +x "${{ matrix.binary }}"
+        shell: bash
+
+      - name: Verify matched binary prints version (Unix)
+        if: ${{ matrix.shell == 'bash' }}
         run: |
           set -euo pipefail
           EXPECTED="${{ steps.pkg.outputs.version }}"
           echo "Expected version: $EXPECTED"
-          for f in dist/sidecar-*; do
-            echo "Testing $f --version";
-            if [[ "$f" == *.exe ]]; then
-              out=$(./$f --version || true)
-            else
-              out=$($f --version || true)
-            fi
-            echo "Output: $out"
-            if [[ "$out" != "$EXPECTED" ]]; then
-              echo "Version mismatch for $f (got '$out')" >&2
-              exit 1
-            fi
-          done
+          echo "Testing ${{ matrix.binary }} --version"
+          out="$("${{ matrix.binary }}" --version)"
+          echo "Output: $out"
+          if [[ "$out" != "$EXPECTED" ]]; then
+            echo "Version mismatch (got '$out')" >&2
+            exit 1
+          fi
         shell: bash
+
+      - name: Verify matched binary prints version (Windows)
+        if: ${{ matrix.shell == 'pwsh' }}
+        run: |
+          $Expected = "${{ steps.pkg.outputs.version }}"
+          Write-Host "Expected version: $Expected"
+          $Binary = "${{ matrix.binary }}"
+          Write-Host "Testing $Binary --version"
+          $Out = & .\$Binary --version
+          Write-Host "Output: $Out"
+          if ($Out -ne $Expected) {
+            Write-Error "Version mismatch (got '$Out')"
+            exit 1
+          }
+        shell: pwsh
 
       - name: Upload dist artifacts
         uses: actions/upload-artifact@v4
         with:
           name: sidecar-${{ matrix.label }}
-          path: dist/*
+          path: ${{ matrix.binary }}
           if-no-files-found: error

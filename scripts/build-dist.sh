@@ -35,11 +35,39 @@ if [[ -z "${OUTPUT_DIR:-}" ]]; then
 fi
 
 mkdir -p "$OUTPUT_DIR"
- 
-bun build --compile --define:APP_VERSION=$VERSION --target=$BUN_MACOS_ARM_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-aarch64-apple-darwin"
-bun build --compile --define:APP_VERSION=$VERSION --target=$BUN_MACOS_X86_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-x86_64-apple-darwin"
-bun build --compile --define:APP_VERSION=$VERSION --target=$BUN_LINUX_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-x86_64-unknown-linux-gnu"
-bun build --compile --define:APP_VERSION=$VERSION --target=$BUN_WINDOWS_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-x86_64-pc-windows-msvc.exe"
+
+# Optional: clean dist directory before building when CLEAN_DIST=1
+if [[ "${CLEAN_DIST:-}" == "1" ]]; then
+	echo "Cleaning dist directory: $OUTPUT_DIR"
+	rm -rf "$OUTPUT_DIR"/*
+fi
+
+# Optional: build only one platform if BUILD_ONLY is set
+case "${BUILD_ONLY:-}" in
+	macos-arm)
+		bun build --compile --define:APP_VERSION=$VERSION --target=$BUN_MACOS_ARM_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-aarch64-apple-darwin"
+		;;
+	macos-x86)
+		bun build --compile --define:APP_VERSION=$VERSION --target=$BUN_MACOS_X86_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-x86_64-apple-darwin"
+		;;
+	linux-x86)
+		bun build --compile --define:APP_VERSION=$VERSION --target=$BUN_LINUX_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-x86_64-unknown-linux-gnu"
+		;;
+	windows-x86)
+		bun build --compile --define:APP_VERSION=$VERSION --target=$BUN_WINDOWS_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-x86_64-pc-windows-msvc.exe"
+		;;
+	"" )
+		# Build all when not specified
+		bun build --compile --define:APP_VERSION=$VERSION --target=$BUN_MACOS_ARM_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-aarch64-apple-darwin"
+		bun build --compile --define:APP_VERSION=$VERSION --target=$BUN_MACOS_X86_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-x86_64-apple-darwin"
+		bun build --compile --define:APP_VERSION=$VERSION --target=$BUN_LINUX_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-x86_64-unknown-linux-gnu"
+		bun build --compile --define:APP_VERSION=$VERSION --target=$BUN_WINDOWS_TARGET "$ROOT_DIR"/index.ts --outfile="$OUTPUT_DIR/$EXE_FILE_NAME-x86_64-pc-windows-msvc.exe"
+		;;
+	*)
+		echo "Unknown BUILD_ONLY value: '$BUILD_ONLY'. Expected one of macos-arm|macos-x86|linux-x86|windows-x86" >&2
+		exit 1
+		;;
+esac
 
 # Clean up any .bun-build files generated during the build process
 shopt -s nullglob dotglob

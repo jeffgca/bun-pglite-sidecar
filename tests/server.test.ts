@@ -68,7 +68,6 @@ describe('Server (unit: lib/server.ts)', () => {
 
 	afterAll(() => {
 		// stop the Bun server and cleanup
-		// @ts-expect-error Bun Server has stop()
 		server?.stop?.()
 		rmSync(dataDir, { recursive: true, force: true })
 	})

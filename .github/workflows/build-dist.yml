@@ -49,6 +49,16 @@ jobs:
           bun --version
           node --version
 
+      - name: Detect Rust host triple
+        id: hostInfo
+        run: echo "tripledouble=$(rustc -vV | awk '/^host:/ {print $2}') >> $GITHUB_OUTPUT"
+        shell: bash
+
+      - name: Determine app base name from package.json
+        id: basename
+        run: echo "outfile=$(bun scripts/get-build-file.ts --bare)" >> $GITHUB_OUTPUT
+        shell: bash
+
       - name: Build matched binary (clean dist)
         run: |
           CLEAN_DIST=1 BUILD_ONLY=${{ matrix.label }} scripts/build-dist.sh
@@ -61,6 +71,11 @@ jobs:
       - name: Determine expected version
         id: pkg
         run: echo "version=$(bun scripts/get-version.ts)" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Determine output file name
+        id: outfile
+        run: echo "outfile=$(bun scripts/get-build-file.ts)" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Make executable (non-Windows)
